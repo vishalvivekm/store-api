@@ -1,18 +1,21 @@
 const Product = require('../models/product')
 
 
-const getAllProductsStatic = async (req, res) => {
-   const search = 'ba'
-    const products = await Product.find({
-        name: {$regex: search, $options: 'i' }, // look for all the name which have ba in them  /*Query and Projection Operators: https://www.mongodb.com/docs/rapid/reference/operator/query/ */
-    })
+ const getAllProductsStatic = async (req, res) => {
+    //regex
+//    const search = 'ba'
+//     const products = await Product.find({
+//         name: {$regex: search, $options: 'i' }, // look for all the name which have ba in them  /*Query and Projection Operators: https://www.mongodb.com/docs/rapid/reference/operator/query/ */
+//     })
+     // sort
+    const products = await Product.find({}).sort('-name -price')
     res.status(200).json({products, nbHits: products.length})
 
    // const products = await Product.find({name: "wooden desk"}) // just find({}) i.e. no args: returns everything
    //  res.status(200).json({products, nbHits: products.length})
 }
 const getAllProducts = async (req, res) => {
-    const {featured, company, name} = req.query
+    const {featured, company, name, sort} = req.query
     const queryObject = {}
 
     if (featured) {
@@ -24,9 +27,18 @@ const getAllProducts = async (req, res) => {
     if (name) {
         queryObject.name = {$regex: name, $options: 'i' }
     }
-    console.log(queryObject)
-    const products = await Product.find(queryObject)
+    //console.log(queryObject)
+    let result = Product.find(queryObject) // query object
+    if(sort) {
+        let sortList = sort.split(',').join(' ')
+        result = result.sort(sortList)
+    } else {
+        result = result.sort('createdAt')
+    }
+    const products = await result
     res.status(200).json({products, nbHits: products.length})
+    // const products = await Product.find(queryObject) // document list
+    // res.status(200).json({products, nbHits: products.length})
 }
 
 module.exports = {
@@ -34,6 +46,25 @@ module.exports = {
 }
 
 
+
+
+// sort, /products?sort=name,-price // function .sort('<property>')
+
+/*
+* const getAllProductsStatic = async (req, res) => {
+    //regex
+    const search = 'ba'
+     const products = await Product.find({
+         name: {$regex: search, $options: 'i' }, // look for all the name which have ba in them  /*Query and Projection Operators: https://www.mongodb.com/docs/rapid/reference/operator/query/
+     })
+     //sort
+const products = await Product.find({}).sort('-name -price')
+res.status(200).json({products, nbHits: products.length})
+
+// const products = await Product.find({name: "wooden desk"}) // just find({}) i.e. no args: returns everything
+//  res.status(200).json({products, nbHits: products.length})
+}
+*/
 
 
 
