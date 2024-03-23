@@ -1,0 +1,5 @@
+const result = Product.find({}) // query object
+const products = await Product.find({}) /* returns a list of documents matching the query criteria */
+
+products.sort() // wrong, it's not query object
+result.sort() // correct
